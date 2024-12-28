@@ -25,6 +25,19 @@ logger = logging.getLogger("SimpleTuner")
 logger.setLevel(environ.get("SIMPLETUNER_LOG_LEVEL", "INFO"))
 
 if __name__ == "__main__":
+    # Load configuration
+    config_path = os.environ.get("ACCELERATE_CONFIG_PATH", None)
+    config = {}
+
+    if config_path:
+        try:
+            with open(config_path, "r") as f:
+                config = json.load(f)
+            logger.info(f"Configuration loaded successfully from {config_path}")
+        except Exception as e:
+            logger.error(f"Failed to load config file from {config_path}: {e}")
+            raise
+
     trainer = None
     try:
         import multiprocessing
@@ -36,7 +49,9 @@ if __name__ == "__main__":
             f"\nError: {e}"
         )
     try:
+        print(config)
         trainer = Trainer(
+            config=config,
             exit_on_error=True,
         )
         trainer.configure_webhook()

@@ -1,0 +1,50 @@
+
+[
+    {
+        "id": "hilary-subject",
+        "type": "local",
+        "crop": true,
+        "crop_style": "center",
+            "crop_aspect": "square",
+        "resolution": 1024,
+        "minimum_image_size": 1024,
+        "maximum_image_size": 1024,
+        "target_downsample_size": 1024,
+        "resolution_type": "pixel_area",
+        "cache_dir_vae": "cache/vae/flux/hilary-subject",
+        "instance_data_dir": "datasets/hilary-lora",
+        "caption_strategy": "textfile",
+        "instance_prompt": "hilary",
+        "metadata_backend": "discovery",
+        "is_regularisation_data": false,
+        "repeats": 1000
+    },
+    {
+        "id": "hilary-subject-512",
+        "type": "local",
+        "crop": true,
+        "crop_style": "center",
+        "crop_aspect": "square",
+        "resolution": 512,
+        "minimum_image_size": 512,
+        "maximum_image_size": 512,
+        "target_downsample_size": 512,
+        "resolution_type": "pixel_area",
+        "cache_dir_vae": "cache/vae/flux/hilary-subject-512",
+        "instance_data_dir": "/datasets/hilary-lora",
+        "caption_strategy": "textfile",
+        "instance_prompt": "hilary",
+        "metadata_backend": "discovery",
+        "is_regularisation_data": false,
+        "repeats": 1000
+    },
+    {
+        "id": "text-embeds",
+        "type": "local",
+        "dataset_type": "text_embeds",
+        "default": true,
+        "cache_dir": "cache/text/flux",
+        "disabled": false,
+        "write_batch_size": 128
+    }
+]

@@ -6,10 +6,10 @@
         "crop": true,
         "crop_style": "center",
             "crop_aspect": "square",
-        "resolution": 1024,
-        "minimum_image_size": 1024,
-        "maximum_image_size": 1024,
-        "target_downsample_size": 1024,
+        "resolution": 310,
+        "minimum_image_size": 310,
+        "maximum_image_size": 310,
+        "target_downsample_size": 310,
         "resolution_type": "pixel_area",
         "cache_dir_vae": "cache/vae/flux/hilary-subject",
         "instance_data_dir": "datasets/hilary-lora",
@@ -25,10 +25,10 @@
         "crop": true,
         "crop_style": "center",
         "crop_aspect": "square",
-        "resolution": 512,
-        "minimum_image_size": 512,
-        "maximum_image_size": 512,
-        "target_downsample_size": 512,
+        "resolution": 256,
+        "minimum_image_size": 256,
+        "maximum_image_size": 256,
+        "target_downsample_size": 256,
         "resolution_type": "pixel_area",
         "cache_dir_vae": "cache/vae/flux/hilary-subject-512",
         "instance_data_dir": "/datasets/hilary-lora",
@@ -45,6 +45,6 @@
         "default": true,
         "cache_dir": "cache/text/flux",
         "disabled": false,
-        "write_batch_size": 128
+        "write_batch_size": 90
     }
 ]

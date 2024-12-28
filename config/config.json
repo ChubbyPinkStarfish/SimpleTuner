@@ -27,7 +27,7 @@
     "--resolution": 1024,
     "--validation_seed": 42,
     "--validation_steps": 1000,
-    "--validation_resolution": "1024x1024",
+    "--validation_resolution": "310x310",
     "--validation_guidance": 3.0,
     "--validation_guidance_rescale": "0.0",
     "--validation_num_inference_steps": "20",

@@ -6,7 +6,7 @@ import os
 from typing import Dict, List, Optional, Tuple
 import random
 import time
-import json
+import json as jshot
 import logging
 import sys
 import torch
@@ -2103,40 +2103,64 @@ def get_default_config():
             default_config[action.dest] = action.default
 
     return default_config
+
+
 def convert_to_boolean(value):
     if isinstance(value, str):
         return value.lower() == 'true'
     return bool(value)
 
+
 def parse_cmdline_args(input_args=None, exit_on_error: bool = False):
     parser = get_argument_parser()
     args = None
+    input_args_list = []
     if input_args is not None:
-        if isinstance(input_args, dict):
-        # Convert dictionary to list of arguments in expected format
-            input_args_list = []
-            for key, value in input_args.items():
-                # If the value is a boolean and True, add the argument to the list
-                if isinstance(value, bool):
-                    if value:  # Only add the argument if its value is True
-                        input_args_list.append(f"--{key}")
-                else:
-                    # If the value is not a boolean, add the argument with its value
-                    input_args_list.append(f"--{key}")
-                    input_args_list.append(str(value))  # Ensure values are strings
-        try:
-            print('malamathi')
-            print(input_args_list)
-            args = parser.parse_args(input_args_list)
-        except:
-            logger.error(f"Could not parse input: {input_args_list}")
-            import traceback
+        # Convert dictionary to a list of arguments in the format ['--key', 'value']
 
-            logger.error(traceback.format_exc())
+        for key, value in input_args.items():
+            # If the value is True, just add the key, else add the key-value pair
+            if value == 'true':
+                input_args_list.append(f"--{key}")
+            elif value != 'false' and value is not None:
+                input_args_list.extend([f"--{key}", str(value)])  # Ensure the value is a string
+    try:
+        my_list = ['--resume_from_checkpoint', 'latest', '--data_backend_config', 'config/dataset.hilary.json',
+                   '--aspect_bucket_rounding', '2', '--seed', '42', '--minimum_image_size', '0', '--output_dir',
+                   'output/models', '--lora_type', 'lycoris', '--lycoris_config', 'config/lycoris_config.json',
+                   '--max_train_steps', '10000', '--num_train_epochs', '0', '--checkpointing_steps', '1000',
+                   '--checkpoints_total_limit', '5', '--hub_model_id', 'simpletuner-lora', '--tracker_project_name',
+                   'lora-training', '--tracker_run_name', 'simpletuner-lora', '--report_to', 'tensorboard',
+                   '--model_type', 'lora', '--pretrained_model_name_or_path', 'black-forest-labs/FLUX.1-dev',
+                   '--model_family', 'flux', '--train_batch_size', '1', '--gradient_checkpointing',
+                   '--caption_dropout_probability', '0.1', '--resolution_type', 'pixel_area', '--resolution', '1024',
+                   '--validation_seed', '42', '--validation_steps', '1000', '--validation_resolution', '1024x1024',
+                   '--validation_guidance', '3.0', '--validation_guidance_rescale', '0.0',
+                   '--validation_num_inference_steps', '20', '--validation_prompt',
+                   'hilary duff a young woman standing on a beach wearing a white shirt,looking at the sea and smiling,behind her are a few people,sand,and a blue sky',
+                   '--mixed_precision', 'bf16', '--optimizer', 'adamw_bf16', '--learning_rate', '0.0001',
+                   '--lr_scheduler', 'polynomial', '--lr_warmup_steps', '100', '--base_model_precision', 'int8-quanto',
+                   '--text_encoder_1_precision', 'no_change', '--text_encoder_2_precision', 'no_change', '--lora_rank',
+                   '16', '--max_grad_norm', '1.0', '--base_model_default_dtype', 'bf16', '--user_prompt_library',
+                   'config/user_prompt_library.json']
+        res = input_args_list == my_list
+        print('tidumm')
+        print(res)
+        print(input_args_list)
+        # Convert using json.dumps
+        double_quoted_list = jshot.dumps(input_args_list)
+
+        args = parser.parse_args(double_quoted_list)
+    except Exception as e:
+        logger.error(f"Could not parse input: {input_args}")
+        import traceback
+        logger.error(traceback.format_exc())
     else:
+
         args = parser.parse_args()
 
     if args is None and exit_on_error:
+        print('oompa')
         sys.exit(1)
 
     if args.optimizer == "adam_bfloat16" and args.mixed_precision != "bf16":
@@ -2148,6 +2172,7 @@ def parse_cmdline_args(input_args=None, exit_on_error: bool = False):
 
     env_local_rank = int(os.environ.get("LOCAL_RANK", -1))
     if env_local_rank != -1 and env_local_rank != args.local_rank:
+        print('oompa')
         args.local_rank = env_local_rank
 
     if args.seed is not None:
@@ -2156,7 +2181,7 @@ def parse_cmdline_args(input_args=None, exit_on_error: bool = False):
             args.seed = int(time.time())
         elif args.seed == -1:
             # more random seed if value is -1, it will be very different on each startup.
-            args.seed = int(random.randint(0, 2**30))
+            args.seed = int(random.randint(0, 2 ** 30))
 
     # default to using the same revision for the non-ema model if not specified
     if args.non_ema_revision is None:
@@ -2170,47 +2195,47 @@ def parse_cmdline_args(input_args=None, exit_on_error: bool = False):
             "When providing --maximum_image_size, you must also provide a value for --target_downsample_size."
         )
     if (
-        args.maximum_image_size is not None
-        and args.resolution_type == "area"
-        and args.maximum_image_size > 5
-        and not os.environ.get("SIMPLETUNER_MAXIMUM_IMAGE_SIZE_OVERRIDE", False)
+            args.maximum_image_size is not None
+            and args.resolution_type == "area"
+            and args.maximum_image_size > 5
+            and not os.environ.get("SIMPLETUNER_MAXIMUM_IMAGE_SIZE_OVERRIDE", False)
     ):
         raise ValueError(
             f"When using --resolution_type=area, --maximum_image_size must be less than 5 megapixels. You may have accidentally entered {args.maximum_image_size} pixels, instead of megapixels."
         )
     elif (
-        args.maximum_image_size is not None
-        and args.resolution_type == "pixel"
-        and args.maximum_image_size < 512
+            args.maximum_image_size is not None
+            and args.resolution_type == "pixel"
+            and args.maximum_image_size < 512
     ):
         raise ValueError(
             f"When using --resolution_type=pixel, --maximum_image_size must be at least 512 pixels. You may have accidentally entered {args.maximum_image_size} megapixels, instead of pixels."
         )
     if (
-        args.target_downsample_size is not None
-        and args.resolution_type == "area"
-        and args.target_downsample_size > 5
-        and not os.environ.get("SIMPLETUNER_MAXIMUM_IMAGE_SIZE_OVERRIDE", False)
+            args.target_downsample_size is not None
+            and args.resolution_type == "area"
+            and args.target_downsample_size > 5
+            and not os.environ.get("SIMPLETUNER_MAXIMUM_IMAGE_SIZE_OVERRIDE", False)
     ):
         raise ValueError(
             f"When using --resolution_type=area, --target_downsample_size must be less than 5 megapixels. You may have accidentally entered {args.target_downsample_size} pixels, instead of megapixels."
         )
     elif (
-        args.target_downsample_size is not None
-        and args.resolution_type == "pixel"
-        and args.target_downsample_size < 512
+            args.target_downsample_size is not None
+            and args.resolution_type == "pixel"
+            and args.target_downsample_size < 512
     ):
         raise ValueError(
             f"When using --resolution_type=pixel, --target_downsample_size must be at least 512 pixels. You may have accidentally entered {args.target_downsample_size} megapixels, instead of pixels."
         )
 
     model_is_bf16 = (
-        args.base_model_precision == "no_change"
-        and (args.mixed_precision == "bf16" or torch.backends.mps.is_available())
-    ) or (
-        args.base_model_precision != "no_change"
-        and args.base_model_default_dtype == "bf16"
-    )
+                            args.base_model_precision == "no_change"
+                            and (args.mixed_precision == "bf16" or torch.backends.mps.is_available())
+                    ) or (
+                            args.base_model_precision != "no_change"
+                            and args.base_model_default_dtype == "bf16"
+                    )
     model_is_quantized = args.base_model_precision != "no_change"
     # check optimiser validity
     chosen_optimizer = args.optimizer
@@ -2237,8 +2262,8 @@ def parse_cmdline_args(input_args=None, exit_on_error: bool = False):
 
     if torch.backends.mps.is_available():
         if (
-            args.model_family.lower() not in ["sd3", "flux", "legacy"]
-            and not args.unet_attention_slice
+                args.model_family.lower() not in ["sd3", "flux", "legacy"]
+                and not args.unet_attention_slice
         ):
             warning_log(
                 "MPS may benefit from the use of --unet_attention_slice for memory savings at the cost of speed."
@@ -2258,9 +2283,9 @@ def parse_cmdline_args(input_args=None, exit_on_error: bool = False):
             args.quantize_via = "cpu"
 
     if (
-        args.max_train_steps is not None
-        and args.max_train_steps > 0
-        and args.num_train_epochs > 0
+            args.max_train_steps is not None
+            and args.max_train_steps > 0
+            and args.num_train_epochs > 0
     ):
         error_log(
             "When using --max_train_steps (MAX_NUM_STEPS), you must set --num_train_epochs (NUM_EPOCHS) to 0."
@@ -2268,18 +2293,18 @@ def parse_cmdline_args(input_args=None, exit_on_error: bool = False):
         sys.exit(1)
 
     if (
-        args.pretrained_vae_model_name_or_path is not None
-        and args.model_family in ["legacy", "flux", "sd3", "sana"]
-        and "sdxl" in args.pretrained_vae_model_name_or_path
-        and "deepfloyd" not in args.model_type
+            args.pretrained_vae_model_name_or_path is not None
+            and args.model_family in ["legacy", "flux", "sd3", "sana"]
+            and "sdxl" in args.pretrained_vae_model_name_or_path
+            and "deepfloyd" not in args.model_type
     ):
         warning_log(
             f"The VAE model {args.pretrained_vae_model_name_or_path} is not compatible. Please use a compatible VAE to eliminate this warning. The baked-in VAE will be used, instead."
         )
         args.pretrained_vae_model_name_or_path = None
     if (
-        args.pretrained_vae_model_name_or_path == ""
-        or args.pretrained_vae_model_name_or_path == "''"
+            args.pretrained_vae_model_name_or_path == ""
+            or args.pretrained_vae_model_name_or_path == "''"
     ):
         args.pretrained_vae_model_name_or_path = None
 
@@ -2332,9 +2357,9 @@ def parse_cmdline_args(input_args=None, exit_on_error: bool = False):
         pass
 
     if (
-        (validation_resolution_is_digit or validation_resolution_is_float)
-        and int(args.validation_resolution) < 128
-        and "deepfloyd" not in args.model_type
+            (validation_resolution_is_digit or validation_resolution_is_float)
+            and int(args.validation_resolution) < 128
+            and "deepfloyd" not in args.model_type
     ):
         # Convert from megapixels to pixels:
         log_msg = f"It seems that --validation_resolution was given in megapixels ({args.validation_resolution}). Converting to pixel measurement:"
@@ -2360,8 +2385,8 @@ def parse_cmdline_args(input_args=None, exit_on_error: bool = False):
 
     t5_max_length = 154
     if args.model_family == "sd3" and (
-        args.tokenizer_max_length is None
-        or int(args.tokenizer_max_length) > t5_max_length
+            args.tokenizer_max_length is None
+            or int(args.tokenizer_max_length) > t5_max_length
     ):
         if not args.i_know_what_i_am_doing:
             warning_log(
@@ -2378,8 +2403,8 @@ def parse_cmdline_args(input_args=None, exit_on_error: bool = False):
     flux_version = "dev"
     model_max_seq_length = 512
     if (
-        "schnell" in args.pretrained_model_name_or_path.lower()
-        or args.flux_fast_schedule
+            "schnell" in args.pretrained_model_name_or_path.lower()
+            or args.flux_fast_schedule
     ):
         if not args.flux_fast_schedule and not args.i_know_what_i_am_doing:
             error_log(
@@ -2391,8 +2416,8 @@ def parse_cmdline_args(input_args=None, exit_on_error: bool = False):
 
     if args.model_family == "flux":
         if (
-            args.tokenizer_max_length is None
-            or int(args.tokenizer_max_length) > model_max_seq_length
+                args.tokenizer_max_length is None
+                or int(args.tokenizer_max_length) > model_max_seq_length
         ):
             if not args.i_know_what_i_am_doing:
                 warning_log(
@@ -2434,7 +2459,7 @@ def parse_cmdline_args(input_args=None, exit_on_error: bool = False):
         args.ema_device = "cpu"
 
     if (args.optimizer_beta1 is not None and args.optimizer_beta2 is None) or (
-        args.optimizer_beta1 is None and args.optimizer_beta2 is not None
+            args.optimizer_beta1 is None and args.optimizer_beta2 is not None
     ):
         error_log("Both --optimizer_beta1 and --optimizer_beta2 should be provided.")
         sys.exit(1)
@@ -2483,8 +2508,8 @@ def parse_cmdline_args(input_args=None, exit_on_error: bool = False):
     args.weight_dtype = (
         torch.bfloat16
         if (
-            args.mixed_precision == "bf16"
-            or (args.base_model_default_dtype == "bf16" and args.is_quantized)
+                args.mixed_precision == "bf16"
+                or (args.base_model_default_dtype == "bf16" and args.is_quantized)
         )
         else torch.float16 if args.mixed_precision == "fp16" else torch.float32
     )
@@ -2500,7 +2525,7 @@ def parse_cmdline_args(input_args=None, exit_on_error: bool = False):
             )
         # is it readable?
         if not os.path.isfile(args.lycoris_config) or not os.access(
-            args.lycoris_config, os.R_OK
+                args.lycoris_config, os.R_OK
         ):
             raise ValueError(
                 f"Could not find the JSON configuration file at '{args.lycoris_config}'"
@@ -2511,13 +2536,13 @@ def parse_cmdline_args(input_args=None, exit_on_error: bool = False):
             lycoris_config = json.load(f)
         assert "algo" in lycoris_config, "lycoris_config JSON must contain algo key"
         assert (
-            "multiplier" in lycoris_config
+                "multiplier" in lycoris_config
         ), "lycoris_config JSON must contain multiplier key"
         assert (
-            "linear_dim" in lycoris_config
+                "linear_dim" in lycoris_config
         ), "lycoris_config JSON must contain linear_dim key"
         assert (
-            "linear_alpha" in lycoris_config
+                "linear_alpha" in lycoris_config
         ), "lycoris_config JSON must contain linear_alpha key"
 
     elif "standard" == args.lora_type.lower():
@@ -2574,9 +2599,9 @@ def parse_cmdline_args(input_args=None, exit_on_error: bool = False):
             raise
 
     if (
-        args.sana_complex_human_instruction is not None
-        and type(args.sana_complex_human_instruction) is str
-        and args.sana_complex_human_instruction not in ["", "None"]
+            args.sana_complex_human_instruction is not None
+            and type(args.sana_complex_human_instruction) is str
+            and args.sana_complex_human_instruction not in ["", "None"]
     ):
         try:
             import json

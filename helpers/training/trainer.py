@@ -156,10 +156,14 @@ class Trainer:
     def __init__(
         self,
         config: dict = None,
+        text_encoders =None,
+        tokeniser=None,
         disable_accelerator: bool = False,
         job_id: str = None,
         exit_on_error: bool = False,
     ):
+        self.tokenizers=config.get('text_encoders', None)
+        self.text_encoders = config.get('text_encoders', None)
         self.config = config
         self.accelerator = None
         self.job_id = job_id
@@ -198,6 +202,7 @@ class Trainer:
         print('habibi')
         print(args)
         self.config = load_config(args, exit_on_error=exit_on_error)
+        print('bumchiku')
         report_to = (
             None if self.config.report_to.lower() == "none" else self.config.report_to
         )

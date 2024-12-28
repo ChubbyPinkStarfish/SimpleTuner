@@ -4,6 +4,9 @@ sentencepiece==0.2.0
 torch-optimi==0.2.1
 torchao==0.7.0
 atomicwrites==1.4.1
+colorama==0.4.6
+torchmetrics>=1.1.1,<2.0.0
+boto3>=1.35.83,<2.0.0
 git+https://github.com/huggingface/diffusers.git
 git+https://github.com/huggingface/optimum-quanto.git
 git+https://github.com/kohakublueleaf/lycoris.git@dev

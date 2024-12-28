@@ -29,12 +29,15 @@ def attach_env_to_path_if_not_present(backend: str, env: str = None):
 
 
 def load_config(args: dict = None, exit_on_error: bool = False):
+    print('ooolala')
     # Check if help is requested; bypass configuration loading if true
     if "-h" in sys.argv or "--help" in sys.argv:
+        print('ooolala4')
         return helpers["cmd"]()
 
     mapped_config = args
     if mapped_config is None or not mapped_config:
+        print('ooolala3')
         config_backend = os.environ.get(
             "SIMPLETUNER_CONFIG_BACKEND",
             os.environ.get("CONFIG_BACKEND", os.environ.get("CONFIG_TYPE", "env")),
@@ -51,9 +54,11 @@ def load_config(args: dict = None, exit_on_error: bool = False):
         mapped_config = helpers[config_backend]()
         if config_backend == "cmd":
             return mapped_config
-
+    print('ooolala-end')
+    print(mapped_config)
     # Other configs need to be passed through parse_cmdline_args to be made whole and have complete defaults and safety checks applied.
     configuration = helpers["cmd"](
+
         input_args=mapped_config, exit_on_error=exit_on_error
     )
 

@@ -160,14 +160,14 @@ class Trainer:
         job_id: str = None,
         exit_on_error: bool = False,
     ):
-        self.config = config
+        # self.config = config
         self.accelerator = None
         self.job_id = job_id
-        logging.info(f"Trainer initialized with config: {config}")
+        # logging.info(f"Trainer initialized with config: {config}")
         StateTracker.set_job_id(job_id)
 
         self.parse_arguments(
-            args=config,
+            # args=config,
             disable_accelerator=disable_accelerator,
             exit_on_error=exit_on_error,
         )

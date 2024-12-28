@@ -2103,18 +2103,33 @@ def get_default_config():
             default_config[action.dest] = action.default
 
     return default_config
-
+def convert_to_boolean(value):
+    if isinstance(value, str):
+        return value.lower() == 'true'
+    return bool(value)
 
 def parse_cmdline_args(input_args=None, exit_on_error: bool = False):
     parser = get_argument_parser()
     args = None
     if input_args is not None:
-        for key_val in input_args:
-            print_on_main_thread(f"{key_val}")
+        if isinstance(input_args, dict):
+        # Convert dictionary to list of arguments in expected format
+            input_args_list = []
+            for key, value in input_args.items():
+                # If the value is a boolean and True, add the argument to the list
+                if isinstance(value, bool):
+                    if value:  # Only add the argument if its value is True
+                        input_args_list.append(f"--{key}")
+                else:
+                    # If the value is not a boolean, add the argument with its value
+                    input_args_list.append(f"--{key}")
+                    input_args_list.append(str(value))  # Ensure values are strings
         try:
-            args = parser.parse_args(input_args)
+            print('malamathi')
+            print(input_args_list)
+            args = parser.parse_args(input_args_list)
         except:
-            logger.error(f"Could not parse input: {input_args}")
+            logger.error(f"Could not parse input: {input_args_list}")
             import traceback
 
             logger.error(traceback.format_exc())

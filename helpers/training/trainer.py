@@ -123,7 +123,7 @@ from helpers.models.flux import (
     get_mobius_guidance,
     apply_flux_schedule_shift,
 )
-
+torch.backends.cudnn.benchmark = True
 is_optimi_available = False
 try:
     from optimi import prepare_for_gradient_release

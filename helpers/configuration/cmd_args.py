@@ -2116,13 +2116,14 @@ def parse_cmdline_args(input_args=None, exit_on_error: bool = False):
     args = None
     input_args_list = []
     if input_args is not None:
+        print('iourt')
         # Convert dictionary to a list of arguments in the format ['--key', 'value']
 
         for key, value in input_args.items():
             # If the value is True, just add the key, else add the key-value pair
-            if value == 'true':
+            if value is True:
                 input_args_list.append(f"--{key}")
-            elif value != 'false' and value is not None:
+            elif value is not False and value is not None:
                 input_args_list.extend([f"--{key}", str(value)])  # Ensure the value is a string
     try:
         my_list = ['--resume_from_checkpoint', 'latest', '--data_backend_config', 'config/dataset.hilary.json',
@@ -2143,21 +2144,12 @@ def parse_cmdline_args(input_args=None, exit_on_error: bool = False):
                    '--text_encoder_1_precision', 'no_change', '--text_encoder_2_precision', 'no_change', '--lora_rank',
                    '16', '--max_grad_norm', '1.0', '--base_model_default_dtype', 'bf16', '--user_prompt_library',
                    'config/user_prompt_library.json']
-        res = input_args_list == my_list
-        print('tidumm')
-        print(res)
-        print(input_args_list)
-        # Convert using json.dumps
-        double_quoted_list = jshot.dumps(input_args_list)
 
-        args = parser.parse_args(double_quoted_list)
+        args = parser.parse_args(my_list)
     except Exception as e:
         logger.error(f"Could not parse input: {input_args}")
         import traceback
         logger.error(traceback.format_exc())
-    else:
-
-        args = parser.parse_args()
 
     if args is None and exit_on_error:
         print('oompa')

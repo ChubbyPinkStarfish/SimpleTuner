@@ -192,6 +192,8 @@ class Trainer:
     def parse_arguments(
         self, args=None, disable_accelerator: bool = False, exit_on_error: bool = False
     ):
+        print('habibi')
+        print(args)
         self.config = load_config(args, exit_on_error=exit_on_error)
         report_to = (
             None if self.config.report_to.lower() == "none" else self.config.report_to
